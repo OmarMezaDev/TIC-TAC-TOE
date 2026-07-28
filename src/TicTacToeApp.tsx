@@ -95,15 +95,17 @@ export const TicTacToeApp = () => {
 
             const gameStorage = localStorage.getItem('game-tictactoe');
 
-            if (!gameStorage)
+            if (!gameStorage) {
+                localStorage.setItem('game-tictactoe', JSON.stringify({ game: game, player: player, isGameOver: isGameOver }));
                 return;
+            }
 
             const gameObjectStorage = JSON.parse(gameStorage);
             setGame(gameObjectStorage.game);
             setPlayer(gameObjectStorage.player);
             setGameOver(gameObjectStorage.isGameOver);
-
             return;
+
         }
 
         localStorage.setItem('game-tictactoe', JSON.stringify({ game: game, player: player, isGameOver: isGameOver }));
@@ -138,36 +140,36 @@ export const TicTacToeApp = () => {
 
     return (
         <>
-            <div className="flex flex-col justify-center items-center gap-4 w-[50%] rounded-md p-4 mb-2">
+            <div className="flex flex-col justify-center items-center gap-4 xl:w-[50%] md:w-[75%] rounded-md p-4 mb-2">
 
-                <h1 className="text-4xl text-white font-bold">TIC TAC TOE</h1>
+                <h1 className="text-2xl md:text-4xl text-white font-bold">TIC TAC TOE</h1>
 
                 {
                     !isGameOver && <div className="flex justify-around items-center gap-4">
-                        <h3 className="text-2xl text-white">Player</h3>
-                        <h3 className="text-2xl">{player === 'X' ? '❌​' : '🟢'}</h3>
+                        <h3 className="text-md md:text-2xl text-white">Player</h3>
+                        <h3 className="text-md border-2 p-2 rounded-md bg-slate-700">{player === 'X' ? '❌​' : '🟢'}</h3>
                     </div>
                 }
 
                 {
                     isGameOver && <div className="flex justify-center items-center">
-                        <h1 className={`text-4xl ${playerWinner === 'O' ? 'text-green-500' : 'text-red-500'} font-thin`}>Player <span>{playerWinner === 'X' ? '❌​' : '🟢'}</span> WINNER</h1>
+                        <h1 className={`text-lg md:text-4xl ${playerWinner === 'O' ? 'text-green-500' : 'text-red-500'} font-thin`}>Player <span>{playerWinner === 'X' ? '❌​' : '🟢'}</span> WINNER</h1>
                     </div>
                 }
 
                 <Button variant="ghost" className='h-10 w-30 text-center bg-gray-800 text-white' onClick={handleResetGame}>Reiniciar</Button>
 
             </div>
-            <div className="grid grid-cols-3 gap-3 bg-slate-800 p-4 rounded-xl shadow-2xl xl:w-[50%] md:w-[75%]">
-                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer min-h-40`} data-index="0">{game === null || !game[0] ? '' : (game[0] === 'X' ? '❌​' : '🟢')}</button>
-                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer min-h-40`} data-index="1">{game === null || !game[1] ? '' : (game[1] === 'X' ? '❌​' : '🟢')}</button>
-                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer min-h-40`} data-index="2">{game === null || !game[2] ? '' : (game[2] === 'X' ? '❌​' : '🟢')}</button>
-                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer min-h-40`} data-index="3">{game === null || !game[3] ? '' : (game[3] === 'X' ? '❌​' : '🟢')}</button>
-                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer min-h-40`} data-index="4">{game === null || !game[4] ? '' : (game[4] === 'X' ? '❌​' : '🟢')}</button>
-                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer min-h-40`} data-index="5">{game === null || !game[5] ? '' : (game[5] === 'X' ? '❌​' : '🟢')}</button>
-                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer min-h-40`} data-index="6">{game === null || !game[6] ? '' : (game[6] === 'X' ? '❌​' : '🟢')}</button>
-                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer min-h-40`} data-index="7">{game === null || !game[7] ? '' : (game[7] === 'X' ? '❌​' : '🟢')}</button>
-                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer min-h-40`} data-index="8">{game === null || !game[8] ? '' : (game[8] === 'X' ? '❌​' : '🟢')}</button>
+            <div className="grid grid-cols-3 gap-3 bg-slate-800 p-4 rounded-xl shadow-2xl w-[90%] md:w-[65%]">
+                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-44`} data-index="0">{game === null || !game[0] ? '' : (game[0] === 'X' ? '❌​' : '🟢')}</button>
+                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-44`} data-index="1">{game === null || !game[1] ? '' : (game[1] === 'X' ? '❌​' : '🟢')}</button>
+                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-44`} data-index="2">{game === null || !game[2] ? '' : (game[2] === 'X' ? '❌​' : '🟢')}</button>
+                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-44`} data-index="3">{game === null || !game[3] ? '' : (game[3] === 'X' ? '❌​' : '🟢')}</button>
+                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-44`} data-index="4">{game === null || !game[4] ? '' : (game[4] === 'X' ? '❌​' : '🟢')}</button>
+                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-44`} data-index="5">{game === null || !game[5] ? '' : (game[5] === 'X' ? '❌​' : '🟢')}</button>
+                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-44`} data-index="6">{game === null || !game[6] ? '' : (game[6] === 'X' ? '❌​' : '🟢')}</button>
+                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-44`} data-index="7">{game === null || !game[7] ? '' : (game[7] === 'X' ? '❌​' : '🟢')}</button>
+                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-44`} data-index="8">{game === null || !game[8] ? '' : (game[8] === 'X' ? '❌​' : '🟢')}</button>
             </div>
 
             !   {/*)  ? '' : (
