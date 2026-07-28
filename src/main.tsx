@@ -5,7 +5,7 @@ import { TicTacToeApp } from './TicTacToeApp'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <section className='bg-slate-800 h-dvh w-dvw flex flex-col justify-center items-center'>
+    <section className='bg-slate-800 h-screen w-screen flex flex-col justify-center items-center'>
       <TicTacToeApp />
     </section>
   </StrictMode>,
