@@ -1,120 +1,52 @@
 
-import { useEffect, useState } from "react"
+import { useEffect, useReducer } from "react"
 import { Button } from "./components/ui/button";
 import conffetti from 'canvas-confetti';
-
-type Player = 'X' | 'O';
-
-const WinnerCombination = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6]
-]
-
-const initialGameState = new Array(9).fill('', 0, 9);
+import { initialGameState, TicTacToeReducer } from "./reducer/TicTacToeReducer";
 
 export const TicTacToeApp = () => {
 
-    const [player, setPlayer] = useState<Player>('X');
-    // const [combinationWinner, setCombinationWinner] = useState<Array<number> | null>(null);
-    const [isGameOver, setGameOver] = useState<Boolean>(false);
-    const [playerWinner, setPlayerWinner] = useState<Player | null>(null);
-    const [game, setGame] = useState<Array<string>>(initialGameState)
-
-    const checkWinner = (currentGame: Array<string>): boolean => {
-
-        let winner = false;
-
-        WinnerCombination.forEach(combinateItem => {
-
-            // console.log(combinateItem);
-            // console.log(currentGame[combinateItem[0]], currentGame[combinateItem[1]], currentGame[combinateItem[2]]);
-
-            if (currentGame[combinateItem[0]] === player && currentGame[combinateItem[1]] === player && currentGame[combinateItem[2]] === player) {
-
-                winner = true;
-                // setCombinationWinner(combinateItem)
-            }
-
-        });
-
-        return winner;
-
-    }
+    const [state, dispatch] = useReducer(TicTacToeReducer, initialGameState());
 
     const handleClick = (event: React.MouseEvent) => {
 
-        const indexElement = (event.target as HTMLElement)?.dataset.index ?? -1;
+        const indexElement = +(event.target as HTMLElement)?.dataset.index;
 
-        if (game[+indexElement] || isGameOver)
-            return;
-
-        const newGame = game.map((item, index) => {
-
-            if (index === +indexElement && !item)
-                return player;
-
-            return item;
-
-        });
-
-        setGame(newGame);
-
-        if (checkWinner(newGame)) {
-            setPlayerWinner(player)
-            setGameOver(true);
-            return;
-        }
-
-        const value = newGame.find((item) => item === '')
-
-        console.log({ newGame, value });
-
-        if (value !== '')
-            setGameOver(true);
-
-        setPlayer(player === 'X' ? 'O' : 'X');
+        dispatch({ type: "CLICK_CELDA", payload: indexElement ?? -1 });
 
     }
 
     const handleResetGame = () => {
 
-        setGame(new Array(9).fill('', 0, 9));
-        setGameOver(false);
-        setPlayerWinner(null);
+        dispatch({ type: "RESET_GAME" });
+
     }
 
     useEffect(() => {
 
-        if (game === initialGameState) {
+        if (state.game === initialGameState().game) {
 
             const gameStorage = localStorage.getItem('game-tictactoe');
 
             if (!gameStorage) {
-                localStorage.setItem('game-tictactoe', JSON.stringify({ game: game, player: player, isGameOver: isGameOver }));
+                localStorage.setItem('game-tictactoe', JSON.stringify({ game: state.game, player: state.player, isGameOver: state.isGameOver }));
                 return;
             }
 
             const gameObjectStorage = JSON.parse(gameStorage);
-            setGame(gameObjectStorage.game);
-            setPlayer(gameObjectStorage.player);
-            setGameOver(gameObjectStorage.isGameOver);
+            dispatch({ type: "LOAD_GAME_LOCALSTORAGE", payload: { game: gameObjectStorage.game, player: gameObjectStorage.player, isGameOver: gameObjectStorage.isGameover } });
+
             return;
 
         }
 
-        localStorage.setItem('game-tictactoe', JSON.stringify({ game: game, player: player, isGameOver: isGameOver }));
+        localStorage.setItem('game-tictactoe', JSON.stringify({ game: state.game, player: state.player, isGameOver: state.isGameOver }));
 
-    }, [game, setGame]);
+    }, [state.game]);
 
     useEffect(() => {
 
-        if (playerWinner)
+        if (state.playerWinner)
             conffetti({
                 particleCount: 300,
                 spread: 200,
@@ -123,18 +55,7 @@ export const TicTacToeApp = () => {
                 scalar: 2,
             });
 
-    }, [isGameOver]);
-
-    // if (isGameOver && playerWinner !== null) {
-    //     debugger
-    //     conffetti({
-    //         particleCount: 300,
-    //         spread: 200,
-    //         startVelocity: 45,
-    //         ticks: 800,
-    //         scalar: 2,
-    //     });
-    // }
+    }, [state.isGameOver]);
 
     return (
         <>
@@ -143,58 +64,34 @@ export const TicTacToeApp = () => {
                 <h1 className="text-2xl md:text-4xl text-white font-bold">TIC TAC TOE</h1>
 
                 {
-                    !isGameOver ?
+                    !state.isGameOver ?
                         <div className="flex justify-around items-center gap-4">
                             <h3 className="text-md md:text-2xl text-white">Player</h3>
-                            <h3 className="text-md border-2 p-2 rounded-md bg-slate-700">{player === 'X' ? '❌​' : '🟢'}</h3>
+                            <h3 className="text-md border-2 p-2 rounded-md bg-slate-700">{state.player === 'X' ? '❌​' : '🟢'}</h3>
                         </div> :
 
-                        !playerWinner ?
+                        !state.playerWinner ?
                             <h1 className="text-lg md:text-4xl text-gray-300">Empate</h1> :
-                            <h1 className={`text-lg md:text-4xl ${playerWinner === 'O' ? 'text-green-500' : 'text-red-500'} font-thin`}>
-                                Player < span > {playerWinner === 'X' ? '❌​' : '🟢'}</span> WINNER
+                            <h1 className={`text-lg md:text-4xl ${state.playerWinner === 'O' ? 'text-green-500' : 'text-red-500'} font-thin`}>
+                                Player < span > {state.playerWinner === 'X' ? '❌​' : '🟢'}</span> WINNER
                             </h1>
                 }
 
-
-                {/* <div className="flex justify-center items-center">
-
-                    {
-                        isGameOver && 
-
-                    }
-
-                </div> */}
-
-                {/* {
-                    isGameOver &&
-                    <div className="flex justify-center items-center">
-                        <h1 className={`text-lg md:text-4xl ${playerWinner === 'O' ? 'text-green-500' : 'text-red-500'} font-thin`}>
-                            Player < span > {playerWinner} === 'X' ? '❌​' : '🟢'</span> WINNER
-                        </h1>
-                    </div>
-                } */}
-
-                <Button className='h-10 w-30 text-center text-white bg-red-500 hover:bg-red-600 border-1 border-gray-600' onClick={handleResetGame}>Reiniciar</Button>
+                <Button className='h-10 w-30 text-center text-white bg-red-500 hover:bg-red-600 border border-gray-600' onClick={handleResetGame}>Reiniciar</Button>
 
             </div >
             <div className="grid grid-cols-3 gap-3 bg-slate-800 p-4 rounded-xl shadow-2xl w-[90%] md:w-[65%] lg:w-[40%]">
-                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-40`} data-index="0">{game === null || !game[0] ? '' : (game[0] === 'X' ? '❌​' : '🟢')}</button>
-                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-40`} data-index="1">{game === null || !game[1] ? '' : (game[1] === 'X' ? '❌​' : '🟢')}</button>
-                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-40`} data-index="2">{game === null || !game[2] ? '' : (game[2] === 'X' ? '❌​' : '🟢')}</button>
-                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-40`} data-index="3">{game === null || !game[3] ? '' : (game[3] === 'X' ? '❌​' : '🟢')}</button>
-                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-40`} data-index="4">{game === null || !game[4] ? '' : (game[4] === 'X' ? '❌​' : '🟢')}</button>
-                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-40`} data-index="5">{game === null || !game[5] ? '' : (game[5] === 'X' ? '❌​' : '🟢')}</button>
-                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-40`} data-index="6">{game === null || !game[6] ? '' : (game[6] === 'X' ? '❌​' : '🟢')}</button>
-                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-40`} data-index="7">{game === null || !game[7] ? '' : (game[7] === 'X' ? '❌​' : '🟢')}</button>
-                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-40`} data-index="8">{game === null || !game[8] ? '' : (game[8] === 'X' ? '❌​' : '🟢')}</button>
+                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-40`} data-index="0">{state.game === null || !state.game[0] ? '' : (state.game[0] === 'X' ? '❌​' : '🟢')}</button>
+                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-40`} data-index="1">{state.game === null || !state.game[1] ? '' : (state.game[1] === 'X' ? '❌​' : '🟢')}</button>
+                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-40`} data-index="2">{state.game === null || !state.game[2] ? '' : (state.game[2] === 'X' ? '❌​' : '🟢')}</button>
+                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-40`} data-index="3">{state.game === null || !state.game[3] ? '' : (state.game[3] === 'X' ? '❌​' : '🟢')}</button>
+                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-40`} data-index="4">{state.game === null || !state.game[4] ? '' : (state.game[4] === 'X' ? '❌​' : '🟢')}</button>
+                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-40`} data-index="5">{state.game === null || !state.game[5] ? '' : (state.game[5] === 'X' ? '❌​' : '🟢')}</button>
+                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-40`} data-index="6">{state.game === null || !state.game[6] ? '' : (state.game[6] === 'X' ? '❌​' : '🟢')}</button>
+                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-40`} data-index="7">{state.game === null || !state.game[7] ? '' : (state.game[7] === 'X' ? '❌​' : '🟢')}</button>
+                <button onClick={e => handleClick(e)} className={`cell bg-slate-700 hover:bg-slate-600 rounded-lg text-4xl md:text-5xl font-bold flex items-center justify-center transition-colors text-white cursor-pointer h-20 md:h-30 lg:h-40`} data-index="8">{state.game === null || !state.game[8] ? '' : (state.game[8] === 'X' ? '❌​' : '🟢')}</button>
             </div>
 
-            !{/*)  ? '' : (
-
-            {/* <div>
-                <Input value={}/>
-            </div> */}
         </>
     )
 }
